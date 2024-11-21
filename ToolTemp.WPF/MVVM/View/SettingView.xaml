@@ -4,10 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="450" Width="528">
+             d:DesignHeight="450" Width="550">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="181"/>
+            <ColumnDefinition Width="220"/>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Border Grid.Column="0" 
@@ -15,22 +15,99 @@
                 BorderBrush="Gray">
             <Grid Margin="0,0,-1,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0*"/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="58"/>
+                    <ColumnDefinition Width="122"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
                 </Grid.RowDefinitions>
 
+                <!--#region Address-->
+                <TextBlock
+                           Grid.Row="1"
+                           Text="Address"
+                           HorizontalAlignment="Center" Width="44"
+                             />
+                <TextBox x:Name="txb_address"
+                         Grid.Column="1"
+                         Grid.Row="1"
+                         Text="{Binding AddressMachine, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <!--#endregion-->
+
+                <!--#region Baudrate  -->
+                <TextBlock Grid.Row="2"
+                          Text="Baudrate"
+                           HorizontalAlignment="Center" Width="48"/>
+                <ComboBox x:Name="cbb_baudrate"
+                          Grid.Row="2"
+                          Grid.Column="1"
+                          Background="Green"
+                          ItemsSource="{Binding LstBaudrate}"
+                          SelectedItem="{Binding SelectedBaudrate, UpdateSourceTrigger=PropertyChanged}"
+                          />
+                <!--#endregion-->
+
+                <!--#region Name-->
+                <TextBlock
+                         Grid.Row="3"
+                         Text="Name"
+                         HorizontalAlignment="Center" Width="32"
+                         />
+                <TextBox x:Name="txb_Name"
+                           Grid.Column="1"
+                           Grid.Row="3"
+                         Text="{Binding NameMachine, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <!--#endregion-->
+
+                <!--#region Port-->
+                <TextBlock Grid.Column="0"
+                             Grid.Row="4"
+                             Text="Port" 
+                             HorizontalAlignment="Center" Width="22"
+                             />
+                <ComboBox x:Name="cbb_port"
+                           Grid.Column="1"
+                           Grid.Row="4"
+                         ItemsSource="{Binding LstPort}"
+                         SelectedItem="{Binding SelectedPort ,UpdateSourceTrigger=PropertyChanged}"
+                         />
+
+                <!--#endregion-->
+                
+                <!--#region Assembling-->
+                <ComboBox x:Name="cbb_ChooseAssembling"
+                          Grid.Column="0"
+                          Grid.Row="5"
+                          ItemsSource="{Binding LstChooseAssembling}"
+                          SelectedItem="{Binding SelectedChooseAssembling , UpdateSourceTrigger=PropertyChanged}"
+                          />
+                <!--#endregion-->
+
+                <!--#region Assembling-->
+                <ComboBox x:Name="cbb_Assembling"
+                          Grid.Column="1"
+                          Grid.Row="5"
+                          ItemsSource="{Binding LstAssembling}"
+                          SelectedItem="{Binding SelectedAssembling , UpdateSourceTrigger=PropertyChanged}"
+                          />
+                <!--#endregion-->
+
                 <Button
-                    Grid.Row="2" 
+                    Grid.Row="7"
+                    
                     Command="{Binding ConnectCommand}"
                     Content="{Binding ConnectCommandText}" HorizontalAlignment="Left"
-                    VerticalAlignment="Center" Width="160" Height="40"
-                    Background="Green" Grid.Column="1" Margin="6,0,0,0"
+                    VerticalAlignment="Center" Width="156" Height="40"
+                    Background="Green" Grid.ColumnSpan="2" Margin="10,0,0,0"
                     />
             </Grid>
         </Border>
@@ -60,7 +137,7 @@
                         </ItemsControl>
                     </Grid>
                 </Border>
-                
+
                 <Border Grid.Column="1">
                     <Grid>
                         <Grid.RowDefinitions>

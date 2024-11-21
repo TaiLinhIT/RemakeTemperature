@@ -1,4 +1,5 @@
 ﻿using GalaSoft.MvvmLight.Messaging;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -30,19 +31,10 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
         private readonly MyDbContext _context;
         private MySerialPortService _myserialPort;
-        
 
-        private DeviceConfig _deviceConfig;
+        public ObservableCollection<int> LstBaudrate { get; set; }
+        public ObservableCollection<string> LstChooseAssembling { get; set; }
 
-        public DeviceConfig DeviceConfig
-        {
-            get { return _deviceConfig; }
-            set
-            {
-                _deviceConfig = value;
-                OnPropertyChanged(nameof(DeviceConfig));
-            }
-        }
         #region Khai báo và lấy ra danh sách các post
 
         private List<string> _lstPost;
@@ -96,7 +88,139 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             }
         }
         #endregion
-        #region Khai báo Combobox 
+
+        #region GetPortName
+        public ObservableCollection<string> LstPort { get; set; } = new ObservableCollection<string>();
+
+
+        public void GetPortName()
+        {
+            string[] lstPort = SerialPort.GetPortNames();
+            foreach (var item in lstPort)
+            {
+                LstPort.Add(item);
+
+            }
+        }
+        #endregion
+
+
+
+
+
+        #region Entity
+
+        private DeviceConfig _deviceConfig;
+
+        public DeviceConfig DeviceConfig
+        {
+            get { return _deviceConfig; }
+            set
+            {
+                _deviceConfig = value;
+                OnPropertyChanged(nameof(DeviceConfig));
+            }
+        }
+        // Thuộc tính lưu trữ Baudrate được chọn
+        private string _selectedBaudrate;
+        public string SelectedBaudrate
+        {
+            get => _selectedBaudrate;
+            set
+            {
+                if (_selectedBaudrate != value)
+                {
+                    _selectedBaudrate = value;
+                    OnPropertyChanged(nameof(SelectedBaudrate));
+                }
+            }
+        }
+
+        //Thuoc tinh luu tru choose Assembling
+        private string _selectedAssembling;
+        public string SelectedAssembling
+        {
+            get => _selectedAssembling;
+            set
+            {
+                if (_selectedAssembling != value)
+                {
+                    _selectedAssembling = value;
+                    OnPropertyChanged(nameof(SelectedAssembling));
+                }
+            }
+        }
+
+
+        //Thuoc tinh luu tru port
+        private string _selectPort;
+
+        public string SelectedPort
+        {
+            get => _selectPort;
+            set
+            {
+                if (_selectPort != value)
+                {
+                    _selectPort = value;
+                    OnPropertyChanged(nameof(SelectedPort));
+                }
+            }
+        }
+
+
+        //Thuoc tinh luu tru LstAssembling
+        private string _selectedChooseAssembling;
+
+        public string SelectedChooseAssembling
+        {
+            get => _selectedChooseAssembling;
+            set
+            {
+                if (_selectedChooseAssembling != value)
+                {
+
+                    _selectedChooseAssembling = value;
+                    OnPropertyChanged(nameof(SelectedChooseAssembling));
+                }
+            }
+        }
+
+
+        // Thuộc tính lưu trữ NameMachine (TextBox)
+        private string _nameMachine;
+        public string NameMachine
+        {
+            get => _nameMachine;
+            set
+            {
+                if (_nameMachine != value)
+                {
+                    _nameMachine = value;
+                    OnPropertyChanged(nameof(NameMachine));
+                }
+            }
+        }
+
+
+
+        //Thuoc tinh luu tru Address
+        private int _addressMachine;
+        public int AddressMachine
+        {
+            get => _addressMachine;
+            set
+            {
+                if (_addressMachine != value)
+                {
+                    _addressMachine = value;
+                    OnPropertyChanged(nameof(AddressMachine));
+                }
+            }
+        }
+
+
+
         public string _nameStyle;
         public string NameStyle
         {
@@ -108,8 +232,6 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 IsEnabledBtnAddStyle = true;
             }
         }
-       
-
 
         public int _max;
         public int Max
@@ -121,7 +243,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 OnPropertyChanged(nameof(Max));
             }
         }
-        
+
 
         public int _min;
         public int Min
@@ -133,11 +255,6 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 OnPropertyChanged(nameof(Min));
             }
         }
-       
-
-        #endregion
-        #region Khai báo entity
-
 
         public List<int> _lstAddress;
         public List<int> ListAddress
@@ -187,7 +304,6 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
         public string Error => null;
         #endregion
-        
 
 
 
@@ -203,7 +319,23 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         #endregion
         private MySerialPortService _mySerialPort;
         public ToolViewModel _toolViewModel;
-        public AppSettings _appSettings;
+        public AppSettings _appSetting;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event Action<Button> NewButtonCreated;
+
+        private string _textBoxContent;
+        public string TextBoxContent
+        {
+            get => _textBoxContent;
+            set
+            {
+                _textBoxContent = value;
+                OnPropertyChanged(nameof(TextBoxContent));
+            }
+        }
+        public ICommand CreatedButtonCommand { get; }
+
         #region Ẩn hiển settings
         public event Action OnConnect;
 
@@ -285,22 +417,44 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             }
         }
         #endregion
-        public SettingViewModel()
+
+        #region Constructor
+        public SettingViewModel(AppSettings appSettings)
         {
-            _appSettings = new AppSettings();
+            _appSetting = appSettings;
+            message.Port = _appSetting.Port;
+            message.Baudrate = _appSetting.Baudrate;
             _toolViewModel = new ToolViewModel();
+
+            _toolViewModel.Port = _appSetting.Port;
+            _toolViewModel.Baudrate = _appSetting.Baudrate;
 
             _myserialPort = new MySerialPortService();
 
             IsEnabledBtnConnect = true;
             IsEnabledBtnAddStyle = true;
             IsEnabledBtnDelete = false;
+
+            // list baudrate
+
+            LstBaudrate = new ObservableCollection<int>()
+            {
+                9600,14400,19200,
+            };
+
+            // list choose Assembling
+
+            LstChooseAssembling = new ObservableCollection<string>()
+            {
+                "Nong","Lanh"
+            };
+
+
             _toolService = new ToolService();
 
+            //Buttons
             ConnectCommand = new RelayCommand(ExecuteConnectCommand, CanConnect);
-
             DisconnectCommand = new RelayCommand(ExecuteDisConnectCommand, CanDisconnect);
-
             AddStyleCommand = new RelayCommand(AddButton, CanAddStyle);
             DeleteStyleCommand = new RelayCommand(ExecuteDeleteCommand, CanDeleteCommand);
 
@@ -318,6 +472,39 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             Messenger.Default.Register<DeviceConfig>(this, "DeviceConfigToChild", HandleDeviceConfigToChildMessage);
 
             LoadButtonsAsync();
+
+            CreatedButtonCommand = new RelayCommand(Createbutton,canExecute);
+
+            GetPortName();
+
+            
+        }
+
+        #endregion
+
+        private bool canExecute(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Createbutton(object obj)
+        {
+            // Kiểm tra nội dung hợp lệ
+            if (!string.IsNullOrWhiteSpace(TextBoxContent))
+            {
+                // Tạo Button mới
+                var newButton = new Button
+                {
+                    Content = TextBoxContent,
+                    Width = 90,
+                    Height = 30,
+                    Margin = new Thickness(5),
+                    Background = new SolidColorBrush(Colors.LightGreen)
+                };
+
+                // Gửi sự kiện
+                NewButtonCreated?.Invoke(newButton);
+            }
         }
 
 
@@ -525,35 +712,51 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
 
 
-        private void ExecuteConnectCommand(object parameter)
+        public async void ExecuteConnectCommand(object parameter)
         {
             //if (string.IsNullOrWhiteSpace(Port) || !DataModelConstant.BaudrateConst.Contains(Baudrate))
             //{
             //    MessageBox.Show("Please connect to the device before");
             //    return;
             //}
-            //if (Port == "COM1" || Baudrate != 115200)
+            //if (Port == "COM1" || Baudrate != 2400)
             //{
             //    MessageBox.Show("Please choose correct connection");
             //    return;
             //}
-            
+
             try
             {
                 //message.Port = this.Port;
                 //message.Baudrate = this.Baudrate;
 
-                message.Port = _appSettings.Port;
-                message.Baudrate = _appSettings.Baudrate;
+                
 
                 Messenger.Default.Send(message, "DeviceConfigMessage");
                 // set port for _toolViewModel
-                _toolViewModel.Port = _appSettings.Port;
-                _toolViewModel.Baudrate = _appSettings.Baudrate;
+                
                 
                 _toolViewModel.Start();
                 IsEnabledBtnConnect = false;
                 MessageBox.Show("Connection successful!");
+
+                Machine machine = new Machine();
+                machine.Name = NameMachine;
+                machine.Port = SelectedPort;
+                machine.Baudrate = SelectedBaudrate;
+                machine.Address = AddressMachine;
+
+
+                await _toolService.InsertToMachine(machine);
+
+                Button btn_Machine = new Button()
+                {
+                    Content = NameMachine,
+                    
+                };
+                // Gửi Button qua sự kiện
+                NewButtonCreated?.Invoke(btn_Machine);
+
             }
             catch (Exception ex)
             {
@@ -650,7 +853,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         #endregion
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChangeds;
 
         protected void OnPropertyChanged(string name)
         {

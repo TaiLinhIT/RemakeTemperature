@@ -47,19 +47,21 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
 
         //constructor
-        public MainViewModel(AppSettings appSettings)
+        public MainViewModel(AppSettings appSettings, SettingViewModel settingViewModel)
         {
             //LstFactory = DataModelConstant.FactoryConst.Values;
             LstAddress = DataModelConstant.AddressConst;
             _context = new MyDbContext();
 
             _mySerialPort = new MySerialPortService();
+            //settingViewModel = new SettingViewModel(appSettings);
 
-           
+            _settingViewModel = new SettingViewModel(appSettings);
 
-            
+            // Lắng nghe sự kiện từ SettingViewModel
+            _settingViewModel.NewButtonCreated += OnNewButtonCreated;
 
-            _settingViewModel = new SettingViewModel();
+
             _toolViewModel = new ToolViewModel();
             _toolService = new ToolService();
 
@@ -89,9 +91,39 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             UpdateTexts();
 
             LoadLanguage("en"); // Mặc định là tiếng Anh
+            LoadDefaultMachine();
             ChangeLanguageCommand = new RelayCommand(ChangeLanguage);
 
 
+            
+
+        }
+        private void OnNewButtonCreated(Button btnMachine)
+        {
+
+            btnMachine.Width = 100;
+            btnMachine.Height = 30;
+            btnMachine.Margin = new Thickness(5);
+            btnMachine.Background = new SolidColorBrush(Colors.LightGreen);
+            btnMachine.MouseRightButtonDown += BtnMachine_MouseRightButtonDown;
+            // Thêm button mới
+            FactoryButtons.Add(btnMachine);
+        }
+
+        private void LoadDefaultMachine()
+        {
+            var NameMachine =  _context.Machines.ToList();
+            
+            foreach (ToolTemp.WPF.Models.Machine Machine  in NameMachine)
+            {
+                ExecuteAddMachineButtonCommand(Machine);
+            }
+            
+        }
+        private void BtnMachine_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            MessageBox.Show("Are you want to modify?", "Notification");
+            
         }
 
         #region Language
@@ -262,7 +294,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             try
             {
                 
-                var mappings = _toolService.GetListFactory(CurrentFactory);
+                var mappings = _toolService.GetListAssembling(CurrentFactory);
                 if (mappings == null)
                 {
                     Tool.Log("Mappings is null.");
@@ -327,6 +359,41 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             }
         }
 
+        private void ExecuteAddMachineButtonCommand(object obj)
+        {
+            if (obj != null)
+            {
+                ToolTemp.WPF.Models.Machine myMachine =  (ToolTemp.WPF.Models.Machine)obj;
+
+                Button btn_Machine = new Button
+                {
+                    Content = new TextBlock
+                    {
+                        Text = myMachine.Name,
+                        Width = 90,
+                        Height = 30,
+                    },
+                    Margin = new Thickness(5),
+                    Command = new RelayCommand(OpenTools),
+                    Background = new SolidColorBrush(Colors.LightGreen)
+                };
+                // Thêm button mới vào danh sách FactoryButtons
+                FactoryButtons.Add(btn_Machine);
+
+                btn_Machine.MouseRightButtonDown += Btn_Machine_MouseRightButtonDown;
+            }
+        }
+
+        private void Btn_Machine_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Ban co muon sua khong?", "Notification", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                MessageBox.Show("thuc hien tiep");
+            }
+            
+        }
+
         private void ExecuteAddFactoryButtonCommand(object obj)
         {
             // Kiểm tra xem nút với Address đã tồn tại trên giao diện chưa
@@ -365,6 +432,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
                 // Thêm button mới vào danh sách FactoryButtons
                 FactoryButtons.Add(newButton);
+                
             }
         }
 
@@ -666,7 +734,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         public  void OnFactorySelectionChanged()
         {
             // Lấy danh sách các Line từ _toolService
-            var listOfLines =  _toolService.GetListFactory(Factory).Select(x => x.Line).ToList();
+            var listOfLines =  _toolService.GetListAssembling(Factory).Select(x => x.Line).ToList();
             
 
             // Chuyển đổi thành ObservableCollection<string>

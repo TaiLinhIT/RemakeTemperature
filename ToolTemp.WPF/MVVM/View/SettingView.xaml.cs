@@ -50,6 +50,7 @@ namespace ToolTemp.WPF.MVVM.View
             return int.TryParse(text, out _);
         }
 
+
     }
 }
 

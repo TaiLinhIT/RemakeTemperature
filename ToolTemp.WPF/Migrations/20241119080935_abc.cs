@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ToolTemp.WPF.Migrations
 {
     /// <inheritdoc />
-    public partial class fixdata : Migration
+    public partial class abc : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -43,8 +43,8 @@ namespace ToolTemp.WPF.Migrations
                     UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsWarning = table.Column<bool>(type: "bit", nullable: false),
                     Sensor_Typeid = table.Column<int>(type: "int", nullable: false),
-                    Sensor_kind = table.Column<string>(type: "nvarchar(63)", maxLength: 63, nullable: false),
-                    Sensor_ant = table.Column<string>(type: "nvarchar(63)", maxLength: 63, nullable: false)
+                    Sensor_kind = table.Column<string>(type: "nvarchar(63)", maxLength: 63, nullable: true),
+                    Sensor_ant = table.Column<string>(type: "nvarchar(63)", maxLength: 63, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -67,6 +67,22 @@ namespace ToolTemp.WPF.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "dv_Machine_Configs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Address = table.Column<int>(type: "int", nullable: false),
+                    Port = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Baudrate = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_dv_Machine_Configs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "dv_style",
                 columns: table => new
                 {
@@ -75,7 +91,7 @@ namespace ToolTemp.WPF.Migrations
                     NameStyle = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Max = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
                     Min = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    Devid = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Devid = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Standard_temp = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Compensate_Vaild = table.Column<decimal>(type: "decimal(18,6)", nullable: true)
                 },
@@ -96,6 +112,9 @@ namespace ToolTemp.WPF.Migrations
 
             migrationBuilder.DropTable(
                 name: "dv_Factory_Configs");
+
+            migrationBuilder.DropTable(
+                name: "dv_Machine_Configs");
 
             migrationBuilder.DropTable(
                 name: "dv_style");

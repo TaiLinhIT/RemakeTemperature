@@ -65,16 +65,15 @@ namespace ToolTemp.WPF.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("Sensor_Typeid")
+                    b.Property<int?>("Sensor_Typeid")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Sensor_ant")
-                        .IsRequired()
                         .HasMaxLength(63)
                         .HasColumnType("nvarchar(63)");
 
                     b.Property<string>("Sensor_kind")
-                        .IsRequired()
                         .HasMaxLength(63)
                         .HasColumnType("nvarchar(63)");
 
@@ -138,6 +137,34 @@ namespace ToolTemp.WPF.Migrations
                     b.ToTable("dv_Factory_Configs", (string)null);
                 });
 
+            modelBuilder.Entity("ToolTemp.WPF.Models.Machine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Address")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Baudrate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Port")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("dv_Machine_Configs");
+                });
+
             modelBuilder.Entity("ToolTemp.WPF.Models.Style", b =>
                 {
                     b.Property<int>("Id")
@@ -151,7 +178,6 @@ namespace ToolTemp.WPF.Migrations
                         .HasColumnName("Compensate_Vaild");
 
                     b.Property<string>("Devid")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 

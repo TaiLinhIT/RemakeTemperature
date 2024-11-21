@@ -62,3 +62,12 @@ INSERT INTO dv_BusDataTemp_Configs (Channel, Company, Port, CommandWrite, Min, M
 ('CH5', 'VA1', 'COM4', '01 03 00 98 00 06', -60, 60, 'A5'),
 ('CH6', 'VA1', 'COM4', '01 03 00 118 00 07', -60, 60, 'A6'),
 ('CH7', 'VA1', 'COM4', '01 03 00 138 00 08', -60, 60,'A7')
+
+
+CREATE TABLE dv_Machine_Configs (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Address INT NOT NULL,
+    Name NVARCHAR(100) NOT NULL,
+    Port NVARCHAR(100) NOT NULL,
+    Baudrate NVARCHAR(100) NOT NULL
+);

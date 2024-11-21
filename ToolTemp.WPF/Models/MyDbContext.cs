@@ -16,6 +16,7 @@ namespace ToolTemp.WPF.Models
         public DbSet<Style> Style { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<Factory> FactoryConfigs { get; set; }
+        public DbSet<Machine> Machines { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {

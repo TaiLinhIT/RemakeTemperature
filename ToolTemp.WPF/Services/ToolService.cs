@@ -153,7 +153,7 @@ namespace ToolTemp.WPF.Services
             }
         }
 
-        public List<Factory> GetListFactory(string factoryCode)
+        public List<Factory> GetListAssembling(string factoryCode)
         {
             try
             {
@@ -227,6 +227,20 @@ namespace ToolTemp.WPF.Services
             }
         }
 
-        
+        public async Task<int> InsertToMachine(Machine machine)
+        {
+            try
+            {
+                await _context.Machines.AddAsync(machine);
+                await _context.SaveChangesAsync();
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return 0;
+            }
+        }
+
     }
 }

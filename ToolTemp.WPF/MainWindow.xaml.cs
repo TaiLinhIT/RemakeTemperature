@@ -13,11 +13,11 @@ namespace ToolTemp.WPF
     public partial class MainWindow : Window
     {
 
-        public MainWindow(AppSettings appSettings)
+        public MainWindow(AppSettings appSettings, SettingViewModel settingViewModel)
         {
             InitializeComponent();
 
-            DataContext = new MainViewModel(appSettings);
+            DataContext = new MainViewModel(appSettings, settingViewModel);
            
 
             // Đăng ký sự kiện đóng form
