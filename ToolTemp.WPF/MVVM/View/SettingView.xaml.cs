@@ -50,7 +50,10 @@ namespace ToolTemp.WPF.MVVM.View
             return int.TryParse(text, out _);
         }
 
+        private void txb_address_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
 
+        }
     }
 }
 

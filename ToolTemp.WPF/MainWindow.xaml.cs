@@ -13,11 +13,11 @@ namespace ToolTemp.WPF
     public partial class MainWindow : Window
     {
 
-        public MainWindow(AppSettings appSettings, SettingViewModel settingViewModel)
+        public MainWindow(MainViewModel viewModel)
         {
             InitializeComponent();
 
-            DataContext = new MainViewModel(appSettings, settingViewModel);
+            DataContext = viewModel;
            
 
             // Đăng ký sự kiện đóng form
@@ -33,13 +33,5 @@ namespace ToolTemp.WPF
             Application.Current.Shutdown();
         }
 
-        // Xử lý khi ComboBox thay đổi lựa chọn
-        private void cbb_factory_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (DataContext is MainViewModel viewModel)
-            {
-                viewModel.OnFactorySelectionChanged();
-            }
-        }
     }
 }

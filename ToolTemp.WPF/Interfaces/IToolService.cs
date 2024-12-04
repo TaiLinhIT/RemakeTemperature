@@ -15,6 +15,10 @@ namespace ToolTemp.WPF.Interfaces
         Task<int> InsertToMachine(Machine machine);
 
 
+        Task<int> EditToMachine(Machine machine);
+        Task<int> DeleteToMachine(Machine machine);
+
+
 
     }
 }

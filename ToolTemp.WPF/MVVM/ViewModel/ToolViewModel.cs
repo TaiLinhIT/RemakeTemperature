@@ -58,12 +58,12 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             ReloadData(FactoryCode,AddressCurrent); // Trigger the data reload immediately with the new address
             StartTimer(); // Start the timer only after setting the address
         }
-
-        public ToolViewModel()
+        //constructor
+        public ToolViewModel(AppSettings appSettings,ToolService toolService)
         {
             CurrentLanguage = "en";
-            _appSettings = new AppSettings();
-            _toolService = new ToolService();
+            _appSettings = appSettings;
+            _toolService = toolService;
            
 
 
@@ -106,9 +106,6 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 }
             }
         }
-
-
-
 
         public void StartTimer()
         {
@@ -247,8 +244,6 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                     await Task.Delay(TimeSpan.FromSeconds(Convert.ToInt32(_appSettings.TimeBusTemp)));
                 }
             }
-            
-
         }
 
         private void ModbusSendFunction(string decimalString)

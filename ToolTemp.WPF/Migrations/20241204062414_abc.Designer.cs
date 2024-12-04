@@ -12,7 +12,7 @@ using ToolTemp.WPF.Models;
 namespace ToolTemp.WPF.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241119080935_abc")]
+    [Migration("20241204062414_abc")]
     partial class abc
     {
         /// <inheritdoc />
@@ -114,6 +114,25 @@ namespace ToolTemp.WPF.Migrations
                     b.ToTable("devices", (string)null);
                 });
 
+            modelBuilder.Entity("ToolTemp.WPF.Models.DvFactoryAssembling", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Assembling")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Factory")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("dv_FactoryAddress_Configs");
+                });
+
             modelBuilder.Entity("ToolTemp.WPF.Models.Factory", b =>
                 {
                     b.Property<int>("Id")
@@ -151,7 +170,14 @@ namespace ToolTemp.WPF.Migrations
                     b.Property<int>("Address")
                         .HasColumnType("int");
 
-                    b.Property<string>("Baudrate")
+                    b.Property<int>("Baudrate")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Line")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LineCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -165,7 +191,7 @@ namespace ToolTemp.WPF.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("dv_Machine_Configs");
+                    b.ToTable("dv_Machine");
                 });
 
             modelBuilder.Entity("ToolTemp.WPF.Models.Style", b =>

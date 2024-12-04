@@ -16,7 +16,8 @@ namespace ToolTemp.WPF.Models
         public DbSet<Style> Style { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<Factory> FactoryConfigs { get; set; }
-        public DbSet<Machine> Machines { get; set; }
+        public DbSet<Machine> machines { get; set; }
+        public DbSet<DvFactoryAssembling> dvFactoryAssemblings { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -25,7 +26,7 @@ namespace ToolTemp.WPF.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            base.OnConfiguring(optionsBuilder.UseSqlServer(@"Server=10.30.0.21;Database=PowerTempWatch;User ID=sa;Password=greenland@VN;TrustServerCertificate=True;MultipleActiveResultSets=True;"));
+            base.OnConfiguring(optionsBuilder.UseSqlServer(@"Server=10.30.80.1;Database=PowerTempWatch;User ID=sa;Password=greenland@VN;TrustServerCertificate=True;MultipleActiveResultSets=True;"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

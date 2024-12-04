@@ -12,6 +12,7 @@ namespace ToolTemp.WPF.Models
         public string Channel { get; set; }
         public string Factory { get; set; }
         public string Line { get; set; }
+        public string LineCode { get; set; }
         public int AddressMachine { get; set; }
         public string Port { get; set; }
         public double Temp { get; set; }

@@ -13,10 +13,10 @@ namespace ToolTemp.WPF.Services
 
     public class ToolService: IToolService
     {
-        private readonly MyDbContext _context = new MyDbContext();
-        public ToolService()
+        private readonly MyDbContext _context;
+        public ToolService(MyDbContext myDbContext)
         {
-            
+            _context = myDbContext;
         }
 
         public async Task<bool> InsertToStyle(Style model)
@@ -231,7 +231,7 @@ namespace ToolTemp.WPF.Services
         {
             try
             {
-                await _context.Machines.AddAsync(machine);
+                await _context.machines.AddAsync(machine);
                 await _context.SaveChangesAsync();
                 return 1;
             }
@@ -242,5 +242,37 @@ namespace ToolTemp.WPF.Services
             }
         }
 
+        public async Task<int> DeleteToMachine(Machine machine)
+        {
+            try
+            {
+                _context.machines.Remove(machine);
+                await _context.SaveChangesAsync();
+                return 1;
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+                return 0;
+            }
+        }
+
+        public async Task<int> EditToMachine(Machine machine)
+        {
+            try
+            {
+                _context.machines.Update(machine);
+                await _context.SaveChangesAsync();
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return 0;
+            }
+
+
+        }
     }
 }

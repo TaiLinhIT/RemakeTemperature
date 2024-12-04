@@ -47,23 +47,23 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
 
         //constructor
-        public MainViewModel(AppSettings appSettings, SettingViewModel settingViewModel)
+        public MainViewModel(MySerialPortService mySerialPortService, MyDbContext myDbContext, AppSettings appSettings, SettingViewModel settingViewModel,ToolViewModel viewModel, ToolService toolService)
         {
             //LstFactory = DataModelConstant.FactoryConst.Values;
             LstAddress = DataModelConstant.AddressConst;
-            _context = new MyDbContext();
+            _context = myDbContext;
 
-            _mySerialPort = new MySerialPortService();
+            _mySerialPort = mySerialPortService;
             //settingViewModel = new SettingViewModel(appSettings);
 
-            _settingViewModel = new SettingViewModel(appSettings);
+            _settingViewModel = settingViewModel;
 
             // Lắng nghe sự kiện từ SettingViewModel
             _settingViewModel.NewButtonCreated += OnNewButtonCreated;
 
 
-            _toolViewModel = new ToolViewModel();
-            _toolService = new ToolService();
+            _toolViewModel = viewModel;
+            _toolService = toolService;
 
             CurrentFactory = appSettings.CurrentArea;
             CurrentViewModel = _settingViewModel;
@@ -80,12 +80,15 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
             IsEnableBtnSaveNewMachine = true;
 
-            LoadMachineDefaultAsync();
 
             Messenger.Default.Register<DeviceConfig>(this, "DeviceConfigMessage", HandleDeviceConfigMessage);
 
             Messenger.Default.Register<Factory>(this, "FactoryConfigMessage", HandleFactoryConfigMessage);
             //Hiển thị máy mới lên 
+
+
+            //Machines
+            Machines = new ObservableCollection<ToolTemp.WPF.Models.Machine>();
 
             _languageService = new LanguageService();
             UpdateTexts();
@@ -94,37 +97,100 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             LoadDefaultMachine();
             ChangeLanguageCommand = new RelayCommand(ChangeLanguage);
 
-
-            
-
         }
-        private void OnNewButtonCreated(Button btnMachine)
+        #region Event to handle new button creation
+        private void OnNewButtonCreated(Button factoryButton, Button assemblingButton)
         {
+            // Create a new Machine object using the information from the buttons
+            var newMachine = new ToolTemp.WPF.Models.Machine
+            {
+                Name = factoryButton.Content.ToString(),
+                Line = assemblingButton.Content.ToString()
+            };
 
-            btnMachine.Width = 100;
-            btnMachine.Height = 30;
-            btnMachine.Margin = new Thickness(5);
-            btnMachine.Background = new SolidColorBrush(Colors.LightGreen);
-            btnMachine.MouseRightButtonDown += BtnMachine_MouseRightButtonDown;
-            // Thêm button mới
-            FactoryButtons.Add(btnMachine);
+            // Add the new machine to the Machines collection
+            Machines.Add(newMachine);
         }
-
+        #endregion
+        #region ObservableCollection for Machines
+        private ObservableCollection<ToolTemp.WPF.Models.Machine> _machines;
+        public ObservableCollection<ToolTemp.WPF.Models.Machine> Machines
+        {
+            get { return _machines; }
+            set
+            {
+                _machines = value;
+                OnPropertyChanged(nameof(Machines));
+            }
+        }
+        #endregion
         private void LoadDefaultMachine()
         {
-            var NameMachine =  _context.Machines.ToList();
-            
-            foreach (ToolTemp.WPF.Models.Machine Machine  in NameMachine)
+            Machines.Clear();
+            var machinesFromDb = _context.machines.ToList(); // Get list of machines from the database
+
+            foreach (var machine in machinesFromDb)
             {
-                ExecuteAddMachineButtonCommand(Machine);
+                Machines.Add(machine);
             }
-            
+
+            // Quay lại MainView nếu cần
+            CurrentViewModel = this;
+
         }
-        private void BtnMachine_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        #region Mouse Click Event Commands
+        public ICommand OpenSettingCommand => new RelayCommand(parameter =>
         {
-            MessageBox.Show("Are you want to modify?", "Notification");
-            
-        }
+            // Lấy đối tượng Machine từ CommandParameter
+            var machine = parameter as ToolTemp.WPF.Models.Machine;
+
+            if (machine == null)
+                return;
+
+            // Hiển thị MessageBox xác nhận
+            var result = MessageBox.Show($"Bạn có muốn mở SettingView cho máy {machine.Name} không?",
+                                         "Xác nhận",
+                                         MessageBoxButton.YesNo,
+                                         MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                // Truyền dữ liệu từ Machine sang SettingViewModel
+                _settingViewModel.SelectedMachine = machine;
+                _settingViewModel.SelectedBaudrate = machine.Baudrate; // Ví dụ thuộc tính Baudrate
+                if (_settingViewModel.SelectedAssembling == null)
+                {
+                    _settingViewModel.SelectedAssembling = new KeyValue(); // Khởi tạo mới
+                }
+                _settingViewModel.SelectedAssembling.key = machine.Line;
+
+                _settingViewModel.SelectedChooseAssembling = machine.LineCode == "H" ? "Nong" : "Lanh";
+                _settingViewModel.SelectedPort = machine.Port;
+                _settingViewModel.NameMachine = machine.Name;
+                _settingViewModel.AddressMachine = machine.Address.ToString();
+                _settingViewModel.IsEnabledBtnAddMachine = false;
+                _settingViewModel.IsEnableBtnEditMachine = true;
+
+
+                // Chuyển sang SettingView
+                CurrentViewModel = _settingViewModel;
+            }
+        });
+
+
+
+        // Left-click on the secondary button to open the ToolView
+        public ICommand OpenToolCommand => new RelayCommand(parameter =>
+        {
+            if (parameter is ToolTemp.WPF.Models.Machine machine)
+            {
+                // Execute logic related to ToolView for the selected machine
+                _toolViewModel.SetFactory(CurrentFactory, machine.Address);
+                _toolViewModel.GetTempFromMachine(machine.Address);
+                CurrentViewModel = _toolViewModel;
+            }
+        });
+        #endregion
 
         #region Language
 
@@ -158,6 +224,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
             //SettingViewModel
             _settingViewModel.NameCommandText = _languageService.GetString("Name");
+            
             _settingViewModel.MaxCommandText = _languageService.GetString("Max");
             _settingViewModel.MinCommandText = _languageService.GetString("Min");
             _settingViewModel.AddStyleCommandText = _languageService.GetString("AddStyle");
@@ -165,6 +232,13 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             _settingViewModel.ChooseStyleCommandText = _languageService.GetString("ChooseStyle");
             _settingViewModel.ConnectCommandText = _languageService.GetString("Connect");
             _settingViewModel.CodeText = _languageService.GetString("Code");
+            _settingViewModel.NameMachineCommandText = _languageService.GetString("Name");
+            _settingViewModel.AddressMachineCommandText = _languageService.GetString("Address");
+            _settingViewModel.BaudrateMachineCommandText = _languageService.GetString("Baudrate");
+            _settingViewModel.PortMachineCommandText = _languageService.GetString("Port");
+            _settingViewModel.AddMachineCommandText = _languageService.GetString("Add Machine");
+            _settingViewModel.EditMachineCommandText = _languageService.GetString("Edit Machine");
+            _settingViewModel.DeleteMachineCommandText = _languageService.GetString("Delete Machine");
 
 
 
@@ -181,6 +255,11 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             OnPropertyChanged(nameof(_settingViewModel.ChooseStyleCommandText));
             OnPropertyChanged(nameof(_settingViewModel.ConnectCommandText));
             OnPropertyChanged(nameof(_settingViewModel.CodeText));
+
+            OnPropertyChanged(nameof(_settingViewModel.AddressMachineCommandText));
+            OnPropertyChanged(nameof(_settingViewModel.AddMachineCommandText));
+            OnPropertyChanged(nameof(_settingViewModel.EditMachineCommandText));
+            OnPropertyChanged(nameof(_settingViewModel.DeleteMachineCommandText));
         }
 
 
@@ -287,37 +366,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
         #endregion
 
-        #region Load Machine mặc định
-        int address;
-        public  void LoadMachineDefaultAsync()
-        {
-            try
-            {
-                
-                var mappings = _toolService.GetListAssembling(CurrentFactory);
-                if (mappings == null)
-                {
-                    Tool.Log("Mappings is null.");
-                }
-                else if (!mappings.Any())
-                {
-                    Tool.Log("Mappings is empty.");
-                }
-                else
-                {
-                    foreach (var mapping in mappings)
-                    {
-                        ExecuteAddFactoryButtonCommand(mapping);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Tool.Log("Error Get Default machine: " + ex.Message);
-            }
-        }
-
-        #endregion
+        
 
         public ObservableCollection<Button> _factoryButtons = new ObservableCollection<Button>();
         public ObservableCollection<Button> FactoryButtons
@@ -359,30 +408,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             }
         }
 
-        private void ExecuteAddMachineButtonCommand(object obj)
-        {
-            if (obj != null)
-            {
-                ToolTemp.WPF.Models.Machine myMachine =  (ToolTemp.WPF.Models.Machine)obj;
-
-                Button btn_Machine = new Button
-                {
-                    Content = new TextBlock
-                    {
-                        Text = myMachine.Name,
-                        Width = 90,
-                        Height = 30,
-                    },
-                    Margin = new Thickness(5),
-                    Command = new RelayCommand(OpenTools),
-                    Background = new SolidColorBrush(Colors.LightGreen)
-                };
-                // Thêm button mới vào danh sách FactoryButtons
-                FactoryButtons.Add(btn_Machine);
-
-                btn_Machine.MouseRightButtonDown += Btn_Machine_MouseRightButtonDown;
-            }
-        }
+       
 
         private void Btn_Machine_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -394,48 +420,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             
         }
 
-        private void ExecuteAddFactoryButtonCommand(object obj)
-        {
-            // Kiểm tra xem nút với Address đã tồn tại trên giao diện chưa
-            bool isButtonExists = FactoryButtons.Any(button =>
-            {
-                return button.Tag?.ToString() == Address.ToString();
-            });
-
-            if (isButtonExists)
-            {
-                // Nếu button đã tồn tại, không tạo thêm mới
-                return;
-            }
-
-            if (obj != null)
-            {
-                Factory model = (Factory)obj;
-                Button newButton = new Button
-                {
-                    Content = new TextBlock
-                    {
-                        Text = AssemblingText + " " + model.Line,  // Sử dụng AssemblingText hiện tại để tạo nội dung button
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Width = 90,
-                        Height = 30,
-                    },
-                    Margin = new Thickness(5),
-                    CommandParameter = model,
-                    Command = new RelayCommand(OpenTools),
-                    Tag = model.Address,
-                    Background = new SolidColorBrush(Colors.LightGreen)
-                };
-
-                newButton.MouseRightButtonDown += NewButton_MouseRightButtonDown;
-                newButton.Click += MainButton_Click;
-
-                // Thêm button mới vào danh sách FactoryButtons
-                FactoryButtons.Add(newButton);
-                
-            }
-        }
-
+       
         private void NewButton_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             MessageBox.Show("ok");
@@ -505,26 +490,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             }
         }
 
-
-
-
-        private void OpenTools(object param)
-        {
-
-            if (param != null)
-            {
-                Factory fac = (Factory)param;
-                _toolViewModel.SetFactory(fac.FactoryCode,fac.Address);
-                
-            }
-            // Switch to the ToolViewModel
-        }
-
         
-        
-
-
-
         public ICommand btnMachineCommand { get; set; }
 
 

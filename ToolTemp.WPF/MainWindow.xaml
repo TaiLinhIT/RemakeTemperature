@@ -87,50 +87,60 @@
                 <!-- Left Menu -->
                 <Grid Grid.Column="0" Margin="10 10 0 10">
                     <Border BorderThickness="0 0 1 0" BorderBrush="Gray">
-                        <Grid Height="624" VerticalAlignment="Top" Margin="0,0,-1,0">
+                        <Grid Height="505" VerticalAlignment="Center" Margin="0,0,-1,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="40"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Text="{Binding MenuCommandText}" FontSize="18" Margin="10 0" Foreground="#a3a3a3"/>
-                            <Separator Grid.Row="1" VerticalAlignment="Stretch" Margin="0 0 10 0"/>
-                            <Grid Grid.Row="2">
-                                <ListBox Grid.Column="0" 
-                                             ItemsSource="{Binding MenuItems}" 
-                                             SelectedItem="{Binding SelectedMenuItem}" 
-                                             BorderThickness="0">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Cursor="Hand" Text="{Binding DisplayName}"
-                                                           FontSize="15" Padding="10" FontWeight="SemiBold"/>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
+                            <TextBlock Grid.Row="1" Text="MENU" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="18" Margin="10 0" Foreground="#a3a3a3"/>
+                            <Separator Grid.Row="2" VerticalAlignment="Stretch" Margin="0 0 10 0"/>
+                            <ScrollViewer Grid.Row="3" Height="480" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <ItemsControl ItemsSource="{Binding Machines}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Margin="0 0 0 10">
+                                                    <!-- Button Name -->
+                                                    <Button Height="40" FontSize="15" Content="{Binding Name}">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="LightGreen" />
+                                                                <Style.Triggers>
+                                                                    <!-- LineCode == 'H' -->
+                                                                    <DataTrigger Binding="{Binding LineCode}" Value="H">
+                                                                        <Setter Property="Background" Value="Red" />
+                                                                    </DataTrigger>
+                                                                    <!-- LineCode == 'C' -->
+                                                                    <DataTrigger Binding="{Binding LineCode}" Value="C">
+                                                                        <Setter Property="Background" Value="LightBlue" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                        <Button.InputBindings>
+                                                            <MouseBinding Gesture="RightClick" 
+Command="{Binding DataContext.OpenSettingCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+CommandParameter="{Binding}" />
+                                                        </Button.InputBindings>
+                                                    </Button>
 
-                            </Grid>
-                            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Vertical">
-                                <ItemsControl ItemsSource="{Binding FactoryButtons}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Vertical"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-
-                            </StackPanel>
-                            <StackPanel Grid.Row="4" Grid.Column="2">
-                                <ItemsControl ItemsSource="{Binding CreatedButtons}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Button Content="{Binding Content}" Command="{Binding ClickCommand}" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
+                                                    <!-- Button Line -->
+                                                    <Button Height="35" FontSize="15" Background="Aqua" 
+                    Content="{Binding Line}" 
+                    Command="{Binding DataContext.OpenToolCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                    CommandParameter="{Binding}" 
+                    Margin="20,0,0,0">
+                                                    </Button>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ScrollViewer>
                         </Grid>
                     </Border>
                 </Grid>

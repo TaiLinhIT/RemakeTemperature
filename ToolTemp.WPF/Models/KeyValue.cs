@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ToolTemp.WPF.Models
 {
-    public class ChannelMachine
+    public class KeyValue
     {
-        public string Channel { get; set; }
-        public string AddressWrite { get; set; }
+        public string key { get; set; }
+        public string value { get; set; }
     }
 }

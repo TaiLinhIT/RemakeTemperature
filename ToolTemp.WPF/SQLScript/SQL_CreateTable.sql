@@ -4,14 +4,17 @@ CREATE TABLE dv_BusDataTemp (
     Factory NVARCHAR(100) NOT NULL,
     Line NVARCHAR(100) NOT NULL,
     AddressMachine INT NOT NULL,
-
+    LineCode NVARCHAR(50) NOT NULL,
     Port NVARCHAR(50) NOT NULL,
     Temp FLOAT NOT NULL,
     Baudrate INT NOT NULL,
     Min FLOAT NOT NULL,
     Max FLOAT NOT NULL,
     UploadDate DATETIME NOT NULL,
-    IsWarning BIT NOT NULL
+    IsWarning BIT NOT NULL,
+    [Sensor_Typeid] [int] NOT NULL,
+	[Sensor_kind] [nvarchar](63) NULL,
+	[Sensor_ant] [nvarchar](63) NULL,
 );
 
 CREATE table dv_style(
@@ -69,5 +72,7 @@ CREATE TABLE dv_Machine_Configs (
     Address INT NOT NULL,
     Name NVARCHAR(100) NOT NULL,
     Port NVARCHAR(100) NOT NULL,
-    Baudrate NVARCHAR(100) NOT NULL
+    [Line] [nvarchar](100) NOT NULL,
+    Baudrate NVARCHAR(100) NOT NULL,
+    [LineCode] [nvarchar](50) NOT NULL
 );

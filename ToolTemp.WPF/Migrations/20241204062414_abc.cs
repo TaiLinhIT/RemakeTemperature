@@ -67,19 +67,35 @@ namespace ToolTemp.WPF.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "dv_Machine_Configs",
+                name: "dv_FactoryAddress_Configs",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Address = table.Column<int>(type: "int", nullable: false),
-                    Port = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Baudrate = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Factory = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Assembling = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_dv_Machine_Configs", x => x.Id);
+                    table.PrimaryKey("PK_dv_FactoryAddress_Configs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "dv_Machine",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Port = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Line = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Baudrate = table.Column<int>(type: "int", nullable: false),
+                    Address = table.Column<int>(type: "int", nullable: false),
+                    LineCode = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_dv_Machine", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -114,7 +130,10 @@ namespace ToolTemp.WPF.Migrations
                 name: "dv_Factory_Configs");
 
             migrationBuilder.DropTable(
-                name: "dv_Machine_Configs");
+                name: "dv_FactoryAddress_Configs");
+
+            migrationBuilder.DropTable(
+                name: "dv_Machine");
 
             migrationBuilder.DropTable(
                 name: "dv_style");

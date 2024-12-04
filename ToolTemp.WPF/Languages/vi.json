@@ -21,5 +21,9 @@
   "CH4": "04-Giua lo 1-nhiet do len",
   "CH5": "05-Giua lo 1-nhiet do xuong",
   "CH6": "06-Giua lo 2-nhiet do len",
-  "CH7": "07-Giua lo 2-nhiet do xuong"
+  "CH7": "07-Giua lo 2-nhiet do xuong",
+  "Address": "Địa chỉ",
+  "Add Machine": "Thêm Máy",
+  "Edit Machine": "Sửa Máy",
+  "Delete Machine": "Xóa Máy"
 }

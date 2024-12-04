@@ -21,5 +21,9 @@
   "CH4": "04-Middle Oven 1-Upper Temperature",
   "CH5": "05-Middle oven 1-Lower temperature",
   "CH6": "06-Middle Oven 2-Upper Temperature",
-  "CH7": "07-Middle Oven2-Lower Temperature"
+  "CH7": "07-Middle Oven2-Lower Temperature",
+  "Address": "អាស័យដ្ឋាន",
+  "Add Machine": "បន្ថែមម៉ាស៊ីន",
+  "Edit Machine": "កែសម្រួលម៉ាស៊ីន",
+  "Delete Machine": "លុបម៉ាស៊ីន"
 }

@@ -36,8 +36,8 @@ namespace ToolTemp.WPF
         {
             // Bind AppSettings with configuration from appsettings.json
             var appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
-            services.AddSingleton(appSettings);
 
+            services.AddSingleton(appSettings);
             // Register MyDbContext as scoped
             services.AddDbContext<MyDbContext>(options =>
                 options.UseSqlServer(appSettings.ConnectString));
@@ -48,10 +48,10 @@ namespace ToolTemp.WPF
             services.AddSingleton<SettingViewModel>();
             services.AddSingleton<ToolViewModel>();
             services.AddSingleton<MySerialPortService>();
-            services.AddSingleton<SharedDataService>();
 
-            // Register ToolService with a scoped lifetime
-            services.AddScoped<IToolService, ToolService>();
+
+            // Register services
+            services.AddSingleton<ToolService>();
         }
 
     }
