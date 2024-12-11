@@ -19,6 +19,8 @@ namespace ToolTemp.WPF.Services
         bool _continue;
         Thread readThread;
         private AppSettings _appsetting;
+        private readonly Dictionary<string, int> _requestIdMapping = new Dictionary<string, int>();
+
         public MySerialPortService()
         {
 

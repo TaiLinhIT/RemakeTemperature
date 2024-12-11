@@ -182,14 +182,38 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         // Left-click on the secondary button to open the ToolView
         public ICommand OpenToolCommand => new RelayCommand(parameter =>
         {
-            if (parameter is ToolTemp.WPF.Models.Machine machine)
+            if (_deviceConfig.Port == "" || _deviceConfig.Port == null)
             {
-                // Execute logic related to ToolView for the selected machine
-                _toolViewModel.SetFactory(CurrentFactory, machine.Address);
-                _toolViewModel.GetTempFromMachine(machine.Address);
-                CurrentViewModel = _toolViewModel;
+                MessageBox.Show("Please connect to the device in setting form before!");
+                CurrentViewModel = _settingViewModel;
+                return;
+            }
+            else if (_deviceConfig.Max == 0 || _deviceConfig.Min == 0)
+            {
+                MessageBox.Show("Please choose Max and Min");
+                CurrentViewModel = _settingViewModel;
+                return;
+            }
+            else
+            {
+                if (parameter is ToolTemp.WPF.Models.Machine machine)
+                {
+                    CurrentViewModel = _toolViewModel;
+
+                    if (machine.Address > 0 && machine.Id > 0)
+                    {
+                        _toolViewModel.SetFactory(CurrentFactory, machine.Address);
+                        _toolViewModel.GetTempFromMachine(machine.Address, machine.Id); // Truyền thêm IdMachine
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid Machine Address or Id");
+                    }
+                }
             }
         });
+
+
         #endregion
 
         #region Language
@@ -478,12 +502,12 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                         {
                             int address = await task;
                             Line = await _toolService.GetLineByAddressAndFactoryAsync(address, CurrentFactory);
-                            await _toolViewModel.GetTempFromMachine(address);
+                           // await _toolViewModel.GetTempFromMachine(address);
                         }
                         else if (button.Tag is int address && _toolViewModel._mySerialPort.IsOpen())
                         {
                             Line = await _toolService.GetLineByAddressAndFactoryAsync(address, CurrentFactory);
-                            await _toolViewModel.GetTempFromMachine(address);
+                            //await _toolViewModel.GetTempFromMachine(address);
                         }
                     }
                 }

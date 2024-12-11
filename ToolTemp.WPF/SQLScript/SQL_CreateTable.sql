@@ -1,21 +1,30 @@
-CREATE TABLE dv_BusDataTemp (
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    Channel NVARCHAR(50) NOT NULL,
-    Factory NVARCHAR(100) NOT NULL,
-    Line NVARCHAR(100) NOT NULL,
-    AddressMachine INT NOT NULL,
-    LineCode NVARCHAR(50) NOT NULL,
-    Port NVARCHAR(50) NOT NULL,
-    Temp FLOAT NOT NULL,
-    Baudrate INT NOT NULL,
-    Min FLOAT NOT NULL,
-    Max FLOAT NOT NULL,
-    UploadDate DATETIME NOT NULL,
-    IsWarning BIT NOT NULL,
-    [Sensor_Typeid] [int] NOT NULL,
+CREATE TABLE [dbo].[dv_BusDataTemp](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[IdMachine] [int]  NOT NULL,
+	[Channel] [nvarchar](50) NOT NULL,
+	[Factory] [nvarchar](100) NOT NULL,
+	[Line] [nvarchar](100) NOT NULL,
+	[AddressMachine] [int] NOT NULL,
+	[LineCode] [nvarchar](50) NOT NULL,
+	[Port] [nvarchar](50) NOT NULL,
+	[Temp] [float] NOT NULL,
+	[Baudrate] [int] NOT NULL,
+	[Min] [float] NOT NULL,
+	[Max] [float] NOT NULL,
+	[UploadDate] [datetime] NOT NULL,
+	[IsWarning] [bit] NOT NULL,
+	[Sensor_Typeid] [int] NOT NULL,
 	[Sensor_kind] [nvarchar](63) NULL,
 	[Sensor_ant] [nvarchar](63) NULL,
-);
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
+
 
 CREATE table dv_style(
     Id INT PRIMARY KEY IDENTITY(1,1),

@@ -12,7 +12,7 @@ using ToolTemp.WPF.Models;
 namespace ToolTemp.WPF.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241204062414_abc")]
+    [Migration("20241210083947_abc")]
     partial class abc
     {
         /// <inheritdoc />
@@ -49,6 +49,9 @@ namespace ToolTemp.WPF.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("IdMachine")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsWarning")
                         .HasColumnType("bit");
 
@@ -56,6 +59,9 @@ namespace ToolTemp.WPF.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("LineCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Max")
                         .HasColumnType("float");

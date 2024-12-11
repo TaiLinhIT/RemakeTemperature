@@ -6,6 +6,8 @@ namespace ToolTemp.WPF.Models
     public class BusDataTemp
     {
         public int Id { get; set; } 
+        public int? IdMachine { get; set; } 
+        public string? LineCode { get; set; }
         public string? Channel { get; set; }
         public string? Factory { get; set; }
         public string? Line { get; set; }

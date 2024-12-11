@@ -1,14 +1,17 @@
 ﻿using GalaSoft.MvvmLight.Messaging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing.Drawing2D;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Threading;
 using ToolTemp.WPF.Configs;
 using ToolTemp.WPF.Core;
@@ -35,7 +38,8 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         private readonly AppSettings _appSettings;
         public MySerialPortService _mySerialPort;
         public string CurrentFactory;
-
+        public int CurrentIdMachine;
+        private readonly Dictionary<string, int> _requestIdMapping = new Dictionary<string, int>();
 
         public ObservableCollection<BusDataWithDevice> _temperatures;
         public ObservableCollection<BusDataWithDevice> Temperatures
@@ -55,16 +59,17 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         {
             FactoryCode = factory;
             AddressCurrent = address;
+   
             ReloadData(FactoryCode,AddressCurrent); // Trigger the data reload immediately with the new address
             StartTimer(); // Start the timer only after setting the address
         }
         //constructor
-        public ToolViewModel(AppSettings appSettings,ToolService toolService)
+        public ToolViewModel(AppSettings appSettings,ToolService toolService, MyDbContext myDbContext)
         {
             CurrentLanguage = "en";
             _appSettings = appSettings;
             _toolService = toolService;
-           
+            _context = myDbContext;
 
 
             Temperatures = new ObservableCollection<BusDataWithDevice>
@@ -125,7 +130,6 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             _mySerialPort.Port = Port;
             _mySerialPort.Baudrate = Baudrate;
             _mySerialPort.Sdre += SerialPort_DataReceived;
-
             _mySerialPort.Conn();
         }
         public void Close()
@@ -140,6 +144,171 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
             }
         }
+
+        #region Read Temperature and save database
+
+        // Cập nhật hàng đợi để lưu cả dữ liệu và IdMachine
+        private readonly Queue<(byte[] Data, int IdMachine)> _dataQueue = new Queue<(byte[] Data, int IdMachine)>();
+        private readonly object _queueLock = new object();
+
+        // Sự kiện nhận dữ liệu từ SerialPort
+        private async void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            try
+            {
+                SerialPort sp = (SerialPort)sender;
+                int bytesCount = sp.BytesToRead;
+                byte[] bufferb = new byte[bytesCount];
+                sp.Read(bufferb, 0, bytesCount);
+
+
+                // Tìm IdMachine từ ánh xạ
+                int idMachine = _context.machines.Where(x => x.Address == (int)bufferb[0]).Select(x => x.Id).FirstOrDefault();
+
+                // Đưa dữ liệu và IdMachine vào hàng đợi
+                lock (_queueLock)
+                {
+                    _dataQueue.Enqueue((bufferb, idMachine));
+                }
+
+                // Xử lý hàng đợi
+                await ProcessDataQueueAsync();
+            }
+            catch (Exception ex)
+            {
+                Tool.Log($"DataReceived Error: {ex.Message}");
+                if (ex.StackTrace != null)
+                    Tool.Log(ex.StackTrace.ToString());
+            }
+        }
+
+
+        // Xử lý dữ liệu trong hàng đợi
+        private async Task ProcessDataQueueAsync()
+        {
+            while (_dataQueue.Count > 0)
+            {
+                (byte[] Data, int IdMachine) item;
+
+                // Lấy dữ liệu và IdMachine từ hàng đợi
+                lock (_queueLock)
+                {
+                    if (_dataQueue.Count == 0) break;
+                    item = _dataQueue.Dequeue();
+                }
+
+                byte[] data = item.Data;
+                int idMachine = item.IdMachine;
+
+                // Kiểm tra CRC
+                if (Tool.CRC_PD(data))
+                {
+                    // Nếu Function Code là 03 (Read Data)
+                    if (data[1] == 3)
+                    {
+                        try
+                        {
+                            int address = data[0];
+                            string factory = FactoryCode;
+                            var modBusDTO = new BusDataTemp();
+
+                            // Xử lý dữ liệu trả về
+                            byte[] bytes = new byte[] { data[4], data[3], data[6], data[5] };
+                            float temp = BitConverter.ToSingle(bytes, 0);
+                            if (temp >= 999)
+                            {
+                                return; // Bỏ qua nếu dữ liệu không hợp lệ
+                            }
+
+                            // Thiết lập các thuộc tính của modBusDTO
+                            modBusDTO.Temp = (double)temp;
+                            modBusDTO.Channel = _mySerialPort.MapByteResponeToChannel(data[2], _appSettings);
+                            modBusDTO.Port = _appSettings.Port;
+                            modBusDTO.Factory = factory;
+                            modBusDTO.Baudrate = Baudrate;
+                            modBusDTO.AddressMachine = address;
+                            modBusDTO.Max = Max;
+                            modBusDTO.Min = Min;
+                            modBusDTO.Sensor_Typeid = 7;
+                            modBusDTO.UploadDate = DateTime.Now;
+                            modBusDTO.IsWarning = temp > Max;
+                            
+
+                            // Lưu IdMachine và Line
+                            modBusDTO.IdMachine = idMachine;
+                            modBusDTO.LineCode = _context.machines.Where(x => x.Id == idMachine).Select(x => x.LineCode).FirstOrDefault();
+                            modBusDTO.Line = _context.machines
+                                .Where(x => x.Id == idMachine)
+                                .Select(x => x.Line)
+                                .FirstOrDefault();
+
+                            // Lưu dữ liệu vào cơ sở dữ liệu
+                            await Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    await _toolService.InsertData(modBusDTO);
+                                }
+                                catch (Exception insertEx)
+                                {
+                                    Tool.Log($"Error saving data: {insertEx.Message}");
+                                    if (insertEx.StackTrace != null)
+                                        Tool.Log(insertEx.StackTrace.ToString());
+                                }
+                            });
+                        }
+                        catch (Exception processEx)
+                        {
+                            Tool.Log($"Error processing data: {processEx.Message}");
+                            if (processEx.StackTrace != null)
+                                Tool.Log(processEx.StackTrace.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    Tool.Log($"Invalid data: {BitConverter.ToString(data)}");
+                }
+            }
+
+
+        }
+
+        #endregion
+
+        public async Task GetTempFromMachine(int address, int idMachine)
+        {
+            while (true)
+            {
+                var listChannel = _appSettings.ConfigCommand;
+                foreach (var item in listChannel)
+                {
+                    ModbusSendFunction("0" + address + item.AddressWrite, idMachine);
+                    await Task.Delay(TimeSpan.FromSeconds(Convert.ToInt32(_appSettings.TimeBusTemp)));
+                }
+            }
+        }
+
+
+        private void ModbusSendFunction(string decimalString, int idMachine)
+        {
+            try
+            {
+                var hexWithCRC = Helper.CalculateCRC(decimalString);
+                var message = hexWithCRC.Replace(" ", ""); // Chuỗi đầy đủ với CRC
+
+                
+                // Gửi message qua SerialPort
+                _mySerialPort.Write(message);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Errors: {ex.Message}");
+                return;
+            }
+        }
+
+
         #region Language
         private string _currentLanguage;
         public string CurrentLanguage
@@ -152,117 +321,5 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             }
         }
         #endregion
-        #region Read Temperature and save database
-
-        private async void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            try
-            {
-                int BytesCount = 0;
-                SerialPort sp = (SerialPort)sender;
-                BytesCount = sp.BytesToRead;
-
-                byte[] bufferb = new byte[BytesCount];
-                sp.Read(bufferb, 0, BytesCount);
-                if (Tool.CRC_PD(bufferb))
-                {
-                    //03 is function read data
-                    if (bufferb[1] == 3)
-                    {
-                        int address = bufferb[0];
-                        string factory = FactoryCode;
-                        var modBusDTO = new BusDataTemp();
-                        byte[] bytes = new byte[] { bufferb[4], bufferb[3], bufferb[6], bufferb[5] };
-                        float temp = BitConverter.ToSingle(bytes, 0);
-                        if (temp >= 999)
-                        {
-                            return;
-                        }
-                        modBusDTO.Temp = (double)temp;
-                        modBusDTO.Channel = _mySerialPort.MapByteResponeToChannel(bufferb[2], _appSettings);
-                        modBusDTO.Port = _appSettings.Port;
-                        modBusDTO.Factory = factory;
-
-                        modBusDTO.Line = await _toolService.GetLineByAddressAndFactoryAsync(address, factory);
-                        modBusDTO.Baudrate = Baudrate;
-                        modBusDTO.AddressMachine = bufferb[0];
-                        //var data = _appSettings.ConfigCommand.FirstOrDefault(x => x.Name.Equals(modBusDTO.Channel));
-                        modBusDTO.Max = Max;
-                        modBusDTO.Min = Min;
-                        modBusDTO.Sensor_Typeid = 7;
-                        modBusDTO.UploadDate = DateTime.Now;
-                        modBusDTO.IsWarning = temp > Max;
-
-                        // Save data asynchronously
-                        await Task.Run(async () =>
-                        {
-                            try
-                            {
-                                await _toolService.InsertData(modBusDTO);
-                            }
-                            catch (Exception insertEx)
-                            {
-                                Tool.Log($"Error saving data: {insertEx.Message}");
-                                if (insertEx.StackTrace != null)
-                                    Tool.Log(insertEx.StackTrace.ToString());
-                            }
-                        });
-
-                        
-                    }
-                }
-                else
-                {
-                    //AddMessage($"Invalid data: {BitConverter.ToString(bufferb)}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Tool.Log(ex.Message);
-                if (ex.StackTrace != null)
-                    Tool.Log(ex.StackTrace.ToString());
-            }
-        }
-
-        #endregion
-
-        #region Handle Modbus
-        // Write to get Temperature
-        
-        public async Task GetTempFromMachine(int address)
-        {
-            while (true)
-            {
-                var listChannel = _appSettings.ConfigCommand;
-                foreach (var item in listChannel)
-                {
-                    //if (_settingViewModel.IsEnabledBtnConnect)
-                    //{
-                    //    return;
-                    //}
-                    ModbusSendFunction("0" + address + item.AddressWrite);
-                    await Task.Delay(TimeSpan.FromSeconds(Convert.ToInt32(_appSettings.TimeBusTemp)));
-                }
-            }
-        }
-
-        private void ModbusSendFunction(string decimalString)
-        {
-            try
-            {
-                var hexWithCRC = Helper.CalculateCRC(decimalString);
-                var message = hexWithCRC.Replace(" ", "");
-                _mySerialPort.Write(message);
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show($"Errorrs: {ex.Message}");
-                return;
-            }
-
-        }
-        #endregion
-
     }
 }

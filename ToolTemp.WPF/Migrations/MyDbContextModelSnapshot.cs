@@ -46,6 +46,9 @@ namespace ToolTemp.WPF.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("IdMachine")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsWarning")
                         .HasColumnType("bit");
 
@@ -53,6 +56,9 @@ namespace ToolTemp.WPF.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("LineCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Max")
                         .HasColumnType("float");

@@ -3,7 +3,7 @@
     @Factory NVARCHAR(100),
     @Address INT,
     @Baudrate INT,
-    @Language NVARCHAR(10) -- Thêm tham số để xác định ngôn ngữ
+    @Language NVARCHAR(10) -- Tham số xác định ngôn ngữ
 AS
 BEGIN
     -- Xác định typeid dựa trên ngôn ngữ
@@ -17,7 +17,7 @@ BEGIN
     ELSE
         SET @TypeId = NULL; -- Giá trị mặc định nếu ngôn ngữ không hợp lệ
 
-    -- Dùng CTE để lọc dữ liệu như trước và thêm join với bảng devices
+    -- Lọc dữ liệu từ dv_BusDataTemp và kết hợp với bảng devices
     WITH tempt AS (
         SELECT *,
                ROW_NUMBER() OVER (PARTITION BY Channel, Factory, AddressMachine, Port, Baudrate ORDER BY UploadDate DESC) AS rn
@@ -28,21 +28,25 @@ BEGIN
           AND Baudrate = @Baudrate
     )
     SELECT t.Id,
+           t.IdMachine,
            t.Channel,
-           t.Temp,
            t.Factory,
            t.Line,
            t.AddressMachine,
+           t.LineCode,
            t.Port,
+           t.Temp,
            t.Baudrate,
-           t.IsWarning,
            ROUND(CAST(t.Min AS FLOAT), 2) AS Min,
            ROUND(CAST(t.Max AS FLOAT), 2) AS Max,
            t.UploadDate,
-           d.name -- Lấy tên từ bảng devices
+           t.IsWarning,
+           t.Sensor_Typeid,
+           t.Sensor_kind,
+           t.Sensor_ant,
+           d.name AS DeviceName -- Tên thiết bị từ bảng devices
     FROM tempt t
-    LEFT JOIN devices d ON t.Channel = d.devid  -- Join với bảng devices theo điều kiện Channel = devid
+    LEFT JOIN devices d ON t.Channel = d.devid
     WHERE t.rn = 1
-      AND d.typeid = @TypeId;  -- Lọc theo typeid dựa trên ngôn ngữ
+      AND (d.typeid = @TypeId OR @TypeId IS NULL); -- Lọc theo typeid, cho phép NULL
 END;
-

@@ -66,13 +66,12 @@ namespace ToolTemp.WPF.Services
                     await connection.OpenAsync();
                 }
 
-                // Using 'using' for command ensures proper disposal
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "GetListDataWithDevices"; // Stored procedure name
                     command.CommandType = System.Data.CommandType.StoredProcedure;
 
-                    // Create parameters and add them
+                    // Add parameters
                     command.Parameters.AddRange(new[]
                     {
                 new SqlParameter("@Language", System.Data.DbType.String) { Value = language },
@@ -84,32 +83,36 @@ namespace ToolTemp.WPF.Services
 
                     var result = new List<BusDataWithDevice>();
 
-                    // Execute the command and process results
-                    using (var reader = await command.ExecuteReaderAsync()) // Sử dụng ExecuteReaderAsync
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
-                        while (await reader.ReadAsync()) // Sử dụng ReadAsync
+                        while (await reader.ReadAsync())
                         {
                             var busDataTempWithDevice = new BusDataWithDevice
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                Channel = reader.GetString(reader.GetOrdinal("Channel")),
-                                Factory = reader.GetString(reader.GetOrdinal("Factory")),
-                                Line = reader.GetString(reader.GetOrdinal("Line")),
-                                AddressMachine = reader.GetInt32(reader.GetOrdinal("AddressMachine")),
-                                Port = reader.GetString(reader.GetOrdinal("Port")),
-                                Temp = reader.GetDouble(reader.GetOrdinal("Temp")),
-                                Baudrate = reader.GetInt32(reader.GetOrdinal("Baudrate")),
-                                Min = reader.GetDouble(reader.GetOrdinal("Min")),
-                                Max = reader.GetDouble(reader.GetOrdinal("Max")),
-                                UploadDate = reader.GetDateTime(reader.GetOrdinal("UploadDate")),
-                                IsWarning = reader.GetBoolean(reader.GetOrdinal("IsWarning")),
-                                DeviceName = reader.GetString(reader.GetOrdinal("name")) // Kiểm tra tên cột cho chính xác
+                                Id = !reader.IsDBNull(reader.GetOrdinal("Id")) ? reader.GetInt32(reader.GetOrdinal("Id")) : 0,
+                                IdMachine = !reader.IsDBNull(reader.GetOrdinal("IdMachine")) ? reader.GetInt32(reader.GetOrdinal("IdMachine")) : 0,
+                                Channel = !reader.IsDBNull(reader.GetOrdinal("Channel")) ? reader.GetString(reader.GetOrdinal("Channel")) : null,
+                                Factory = !reader.IsDBNull(reader.GetOrdinal("Factory")) ? reader.GetString(reader.GetOrdinal("Factory")) : null,
+                                Line = !reader.IsDBNull(reader.GetOrdinal("Line")) ? reader.GetString(reader.GetOrdinal("Line")) : null,
+                                AddressMachine = !reader.IsDBNull(reader.GetOrdinal("AddressMachine")) ? reader.GetInt32(reader.GetOrdinal("AddressMachine")) : 0,
+                                LineCode = !reader.IsDBNull(reader.GetOrdinal("LineCode")) ? reader.GetString(reader.GetOrdinal("LineCode")) : null,
+                                Port = !reader.IsDBNull(reader.GetOrdinal("Port")) ? reader.GetString(reader.GetOrdinal("Port")) : null,
+                                Temp = !reader.IsDBNull(reader.GetOrdinal("Temp")) ? reader.GetDouble(reader.GetOrdinal("Temp")) : 0,
+                                Baudrate = !reader.IsDBNull(reader.GetOrdinal("Baudrate")) ? reader.GetInt32(reader.GetOrdinal("Baudrate")) : 0,
+                                Min = !reader.IsDBNull(reader.GetOrdinal("Min")) ? reader.GetDouble(reader.GetOrdinal("Min")) : 0,
+                                Max = !reader.IsDBNull(reader.GetOrdinal("Max")) ? reader.GetDouble(reader.GetOrdinal("Max")) : 0,
+                                UploadDate = !reader.IsDBNull(reader.GetOrdinal("UploadDate")) ? reader.GetDateTime(reader.GetOrdinal("UploadDate")) : DateTime.MinValue,
+                                IsWarning = !reader.IsDBNull(reader.GetOrdinal("IsWarning")) ? reader.GetBoolean(reader.GetOrdinal("IsWarning")) : false,
+                                Sensor_Typeid = !reader.IsDBNull(reader.GetOrdinal("Sensor_Typeid")) ? reader.GetInt32(reader.GetOrdinal("Sensor_Typeid")) : 0,
+                                Sensor_kind = !reader.IsDBNull(reader.GetOrdinal("Sensor_kind")) ? reader.GetString(reader.GetOrdinal("Sensor_kind")) : null,
+                                Sensor_ant = !reader.IsDBNull(reader.GetOrdinal("Sensor_ant")) ? reader.GetString(reader.GetOrdinal("Sensor_ant")) : null,
+                                DeviceName = !reader.IsDBNull(reader.GetOrdinal("DeviceName")) ? reader.GetString(reader.GetOrdinal("DeviceName")) : null
                             };
+
 
                             result.Add(busDataTempWithDevice);
                         }
                     }
-
 
                     return result;
                 }
@@ -117,7 +120,7 @@ namespace ToolTemp.WPF.Services
             catch (Exception ex)
             {
                 Tool.Log($"Error in GetListDataWithDevicesAsync: {ex.Message}");
-                return new List<BusDataWithDevice>(); // Return an empty list instead of null to avoid potential null references.
+                return new List<BusDataWithDevice>(); // Return an empty list instead of null
             }
         }
 
