@@ -107,8 +107,10 @@ namespace ToolTemp.WPF.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NameStyle = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Max = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
-                    Min = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    SoleMax = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    SoleMin = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    ShoesMax = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
+                    ShoesMin = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
                     Devid = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Standard_temp = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Compensate_Vaild = table.Column<decimal>(type: "decimal(18,6)", nullable: true)

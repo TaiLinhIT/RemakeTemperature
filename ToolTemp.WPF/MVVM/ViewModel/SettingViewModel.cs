@@ -273,29 +273,49 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             }
         }
 
-        public int _max;
-        public int Max
+        
+        public int _demin;
+        public int DeMin
         {
-            get => _max;
+            get => _demin;
             set
             {
-                this._max = value;
-                OnPropertyChanged(nameof(Max));
+                this._demin = value;
+                OnPropertyChanged(nameof(DeMin));
             }
         }
 
-
-        public int _min;
-        public int Min
+        public int _demax;
+        public int DeMax
         {
-            get => _min;
+            get => _demax;
             set
             {
-                this._min = value;
-                OnPropertyChanged(nameof(Min));
+                this._demax = value;
+                OnPropertyChanged(nameof(DeMax));
             }
         }
 
+        public int _giaymin;
+        public int GiayMin
+        {
+            get => _giaymin;
+            set
+            {
+                this._giaymin = value;
+                OnPropertyChanged(nameof(GiayMin));
+            }
+        }
+        public int _giaymax;
+        public int GiayMax
+        {
+            get => _giaymax;
+            set
+            {
+                this._giaymax = value;
+                OnPropertyChanged(nameof(GiayMax));
+            }
+        }
         public List<int> _lstAddress;
         public List<int> ListAddress
         {
@@ -364,7 +384,6 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         private MySerialPortService _mySerialPort;
         public ToolViewModel _toolViewModel;
         public AppSettings _appSetting;
-        private readonly ToolService _iService;
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action<Button,Button> NewButtonCreated;
 
@@ -537,7 +556,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         #region Constructor
         public SettingViewModel(AppSettings appSettings, ToolViewModel toolViewModel, ToolService toolService, MyDbContext myDbContext)
         {
-            _iService = toolService;
+            _toolService = toolService;
             _context = myDbContext;
             _appSetting = appSettings;
             message.Port = _appSetting.Port;
@@ -655,8 +674,8 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         {
             Port = message.Port;
             Baudrate = message.Baudrate;
-            Max = Convert.ToInt32(message.Max) ;
-            Min = Convert.ToInt32(message.Min);
+            DeMax = Convert.ToInt32(message.DeMax) ;
+            DeMin = Convert.ToInt32(message.DeMin);
             NameStyle = message.NameStyle;
         }
 
@@ -707,8 +726,10 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         {
             Style style = new Style();
             style.NameStyle = NameStyle;
-            style.Max = Max;
-            style.Min = Min;
+            style.DeMax = DeMax;
+            style.DeMin = DeMin;
+            style.GiayMax = GiayMax;
+            style.GiayMin = GiayMin;
             // Save data asynchronously
             await Task.Run(async () =>
             {
@@ -769,17 +790,17 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 {
                     // Use the Style object to populate DeviceConfig
                     message.NameStyle = style.NameStyle;
-                    message.Max = style.Max;
-                    message.Min = style.Min;
+                    message.DeMax = style.DeMax;
+                    message.DeMin = style.DeMin;
 
                     Messenger.Default.Send(message, "DeviceConfigMessage");
-                    _toolViewModel.Max = Convert.ToInt32(style.Max);
-                    _toolViewModel.Min = Convert.ToInt32(style.Min);
+                    _toolViewModel.Max = Convert.ToInt32(style.DeMax);
+                    _toolViewModel.Min = Convert.ToInt32(style.DeMin);
                     _toolViewModel.NameStyle = style.NameStyle;
 
                     NameStyle = style.NameStyle;
-                    Max = Convert.ToInt32(style.Max);
-                    Min = Convert.ToInt32(style.Min);
+                    DeMax = Convert.ToInt32(style.DeMax);
+                    DeMin = Convert.ToInt32(style.DeMin);
                     IsEnabledBtnAddStyle = false;
                     IsEnabledBtnDelete = true;
                     
@@ -804,7 +825,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
             try
             {
                 // Retrieve the styles from the database
-                var styles = _iService.GetAllStyles();
+                var styles = _toolService.GetAllStyles();
 
                 // Clear existing buttons if necessary
                 ButtonList.Clear();
@@ -842,7 +863,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
         {
             try
             {
-                return !string.IsNullOrEmpty(NameStyle) && !string.IsNullOrWhiteSpace(Max.ToString()) && !string.IsNullOrWhiteSpace(Min.ToString()) && IsEnabledBtnAddStyle;
+                return !string.IsNullOrEmpty(NameStyle) && !string.IsNullOrWhiteSpace(DeMax.ToString()) && !string.IsNullOrWhiteSpace(DeMin.ToString()) && IsEnabledBtnAddStyle;
 
             }
             catch (Exception ex)
@@ -929,8 +950,8 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 _toolService.DeleteStyleByName(NameStyle);
                 LoadButtonsAsync();
                 NameStyle = string.Empty;
-                Max = 0;
-                Min = 0;
+                DeMax = 0;
+                DeMin = 0;
                 MessageBox.Show("Delete succesesfully!");
             }
             catch (Exception ex)
@@ -967,7 +988,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 machines.Line = SelectedAssembling.key;
                 machines.LineCode = SelectedChooseAssembling == "Nong" ? "H" : "C";
 
-                await _iService.InsertToMachine(machines);
+                await _toolService.InsertToMachine(machines);
                 IsEnabledBtnAddMachine = false;
 
                 // Tạo nút Machine
@@ -1046,7 +1067,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 find.LineCode = SelectedChooseAssembling == "Nong" ? "H" : "C";
 
                 //Lưu thay đổi vào cơ sở dữ liệu
-                await _iService.EditToMachine(find);
+                await _toolService.EditToMachine(find);
                 OnMachineLoadDefault?.Invoke();
                 MessageBox.Show("Edit successfully!");
             }
@@ -1103,7 +1124,7 @@ namespace ToolTemp.WPF.MVVM.ViewModel
 
 
                 //Lưu thay đổi vào cơ sở dữ liệu
-                await _iService.DeleteToMachine(find);
+                await _toolService.DeleteToMachine(find);
                 //Giả sử đã xóa thành công
                 OnMachineLoadDefault?.Invoke();
                 MessageBox.Show("Delete successfully!");

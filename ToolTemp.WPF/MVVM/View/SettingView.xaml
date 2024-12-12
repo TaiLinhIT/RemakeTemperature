@@ -175,6 +175,9 @@
                             <RowDefinition Height="50"/>
                             <RowDefinition Height="50"/>
                             <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -185,33 +188,58 @@
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Text="{Binding NameCommandText}"/>
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Text="{Binding MaxCommandText}"/>
                         <TextBlock  HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Text="{Binding MinCommandText}"/>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0"  Text="Đế"/>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0"  Text="Giày"/>
                         <TextBox 
-                            x:Name="cbb_name" 
-                            Grid.Row="1" 
-                            Grid.Column="1"
-                            Margin="10 10 5 10" 
-                            Text="{Binding NameStyle, UpdateSourceTrigger=PropertyChanged}"
-                            >
+    x:Name="cbb_name" 
+    Grid.Row="1" 
+    Grid.Column="1"
+    Margin="10 10 5 10" 
+    Text="{Binding NameStyle, UpdateSourceTrigger=PropertyChanged}"
+    >
 
                         </TextBox>
-                        <TextBox x:Name="cbb_max" 
-                                  Grid.Row="2"  
-                                  Grid.Column="1"
-                                  Margin="10 10 5 10" 
-                                  Text="{Binding Max, UpdateSourceTrigger=PropertyChanged}"
-                                  PreviewTextInput="NumberValidationTextBox">
-                        </TextBox>
-                        <TextBox x:Name="cbb_min" 
-                                  Grid.Row="3"
-                                  Grid.Column="1"
-                                  Margin="10 10 5 10" 
-                                  Text="{Binding Min, UpdateSourceTrigger=PropertyChanged}"
-                                  PreviewTextInput="NumberValidationTextBox">
+                        
+                        <TextBox 
+        x:Name="de_Max" 
+        Grid.Row="4" 
+        Grid.Column="1"
+        Margin="10 10 5 10" 
+        Text="{Binding DeMax, UpdateSourceTrigger=PropertyChanged}"
+        >
 
                         </TextBox>
+                        <TextBox 
+        x:Name="de_Min" 
+        Grid.Row="5" 
+        Grid.Column="1"
+        Margin="10 10 5 10" 
+        Text="{Binding DeMin, UpdateSourceTrigger=PropertyChanged}"
+        >
+
+                        </TextBox>
+                        <TextBox 
+        x:Name="giay_Max" 
+        Grid.Row="6" 
+        Grid.Column="1"
+        Margin="10 10 5 10" 
+        Text="{Binding GiayMax, UpdateSourceTrigger=PropertyChanged}"
+        >
+
+                        </TextBox>
+                        <TextBox 
+        x:Name="giay_Min" 
+        Grid.Row="7" 
+        Grid.Column="1"
+        Margin="10 10 5 10" 
+        Text="{Binding GiayMin, UpdateSourceTrigger=PropertyChanged}"
+        >
+
+                        </TextBox>
+                        
                         <Button 
                             x:Name="btn_AddStyle" 
-                            Grid.Row="4"
+                            Grid.Row="8"
                             Grid.Column="1"
                             Content="{Binding AddStyleCommandText}" 
                             Command="{Binding AddStyleCommand}" 
@@ -221,7 +249,7 @@
 
                         <Button 
                             x:Name="btn_DeleteStyle" 
-                            Grid.Row="6"
+                            Grid.Row="9"
                             Grid.Column="1"
                             Content="{Binding DeleteStyleCommandText}" 
                             Margin="10 10 5 10" 

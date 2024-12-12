@@ -12,7 +12,7 @@ using ToolTemp.WPF.Models;
 namespace ToolTemp.WPF.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241210083947_abc")]
+    [Migration("20241212092102_abc")]
     partial class abc
     {
         /// <inheritdoc />
@@ -212,15 +212,25 @@ namespace ToolTemp.WPF.Migrations
                         .HasColumnType("decimal(18,6)")
                         .HasColumnName("Compensate_Vaild");
 
+                    b.Property<decimal>("DeMax")
+                        .HasColumnType("decimal(18,6)")
+                        .HasColumnName("SoleMax");
+
+                    b.Property<decimal>("DeMin")
+                        .HasColumnType("decimal(18,6)")
+                        .HasColumnName("SoleMin");
+
                     b.Property<string>("Devid")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<decimal>("Max")
-                        .HasColumnType("decimal(18,6)");
+                    b.Property<decimal>("GiayMax")
+                        .HasColumnType("decimal(18,6)")
+                        .HasColumnName("ShoesMax");
 
-                    b.Property<decimal>("Min")
-                        .HasColumnType("decimal(18,6)");
+                    b.Property<decimal>("GiayMin")
+                        .HasColumnType("decimal(18,6)")
+                        .HasColumnName("ShoesMin");
 
                     b.Property<string>("NameStyle")
                         .IsRequired()

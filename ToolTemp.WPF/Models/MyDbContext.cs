@@ -96,14 +96,21 @@ namespace ToolTemp.WPF.Models
                     .IsRequired()
                     .HasMaxLength(50); // NVARCHAR(50)
 
-                entity.Property(e => e.Max)
+                entity.Property(e => e.DeMax)
                     .IsRequired()
                     .HasColumnType("decimal(18,6)"); // NUMERIC(18,6)
 
-                entity.Property(e => e.Min)
+                entity.Property(e => e.DeMin)
                     .IsRequired()
                     .HasColumnType("decimal(18,6)"); // NUMERIC(18,6)
 
+                entity.Property(e => e.GiayMax)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,6)"); // NUMERIC(18,6)
+
+                entity.Property(e => e.GiayMin)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,6)"); // NUMERIC(18,6)
                 entity.Property(e => e.Devid)
                     .HasMaxLength(255); // NVARCHAR(255)
 

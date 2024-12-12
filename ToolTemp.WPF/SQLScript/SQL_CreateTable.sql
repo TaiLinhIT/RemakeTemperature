@@ -26,12 +26,23 @@ GO
 
 
 
-CREATE table dv_style(
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    NameStyle NVARCHAR(50) NOT NULL,
-    Max INT NOT NULL,
-    Min INT NOT NULL
-);
+CREATE TABLE [dbo].[dv_style](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[NameStyle] [nvarchar](50) NOT NULL,
+	[ShoesMax] [numeric](18, 6) NOT NULL,
+	[ShoesMin] [numeric](18, 6) NOT NULL,
+	[SoleMax] [numeric](18, 6) NOT NULL,
+	[SoleMin] [numeric](18, 6) NOT NULL,
+	[devid] [nvarchar](255) NULL,
+	[Standard_temp] [nvarchar](255) NULL,
+	[Compensate_Vaild] [numeric](18, 6) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
 
 create table dv_MapFactoryAddress(
     Id int primary key identity(1,1),

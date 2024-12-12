@@ -12,8 +12,14 @@ namespace ToolTemp.WPF.Models
     {
         public int Id { get; set; }
         public string? NameStyle { get; set; }
-        public decimal Max { get; set; }
-        public decimal Min { get; set; }
+        [Column("SoleMax")]
+        public decimal DeMax { get; set; }
+        [Column("SoleMin")]
+        public decimal DeMin { get; set; }
+        [Column("ShoesMax")]
+        public decimal GiayMax { get; set; }
+        [Column("ShoesMin")]
+        public decimal GiayMin { get; set; }
         public string? Devid { get; set; } // Cột này nếu có trong DB
 
         [Column("Standard_temp")]

@@ -209,15 +209,25 @@ namespace ToolTemp.WPF.Migrations
                         .HasColumnType("decimal(18,6)")
                         .HasColumnName("Compensate_Vaild");
 
+                    b.Property<decimal>("DeMax")
+                        .HasColumnType("decimal(18,6)")
+                        .HasColumnName("SoleMax");
+
+                    b.Property<decimal>("DeMin")
+                        .HasColumnType("decimal(18,6)")
+                        .HasColumnName("SoleMin");
+
                     b.Property<string>("Devid")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<decimal>("Max")
-                        .HasColumnType("decimal(18,6)");
+                    b.Property<decimal>("GiayMax")
+                        .HasColumnType("decimal(18,6)")
+                        .HasColumnName("ShoesMax");
 
-                    b.Property<decimal>("Min")
-                        .HasColumnType("decimal(18,6)");
+                    b.Property<decimal>("GiayMin")
+                        .HasColumnType("decimal(18,6)")
+                        .HasColumnName("ShoesMin");
 
                     b.Property<string>("NameStyle")
                         .IsRequired()

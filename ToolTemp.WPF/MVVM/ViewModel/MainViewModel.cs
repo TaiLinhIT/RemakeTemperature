@@ -188,12 +188,12 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 CurrentViewModel = _settingViewModel;
                 return;
             }
-            else if (_deviceConfig.Max == 0 || _deviceConfig.Min == 0)
-            {
-                MessageBox.Show("Please choose Max and Min");
-                CurrentViewModel = _settingViewModel;
-                return;
-            }
+            //else if (_deviceConfig.Max == 0 || _deviceConfig.Min == 0)
+            //{
+            //    MessageBox.Show("Please choose Max and Min");
+            //    CurrentViewModel = _settingViewModel;
+            //    return;
+            //}
             else
             {
                 if (parameter is ToolTemp.WPF.Models.Machine machine)
@@ -460,12 +460,12 @@ namespace ToolTemp.WPF.MVVM.ViewModel
                 CurrentViewModel = _settingViewModel;
                 return;
             }
-            else if (_deviceConfig.Max == 0 || _deviceConfig.Min == 0)
-            {
-                MessageBox.Show("Please choose Max and Min");
-                CurrentViewModel = _settingViewModel;
-                return;
-            }
+            //else if (_deviceConfig.Max == 0 || _deviceConfig.Min == 0)
+            //{
+            //    MessageBox.Show("Please choose Max and Min");
+            //    CurrentViewModel = _settingViewModel;
+            //    return;
+            //}
             else
             {
                 CurrentViewModel = _toolViewModel;
